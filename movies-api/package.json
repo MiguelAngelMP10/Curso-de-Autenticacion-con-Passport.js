@@ -1,0 +1,54 @@
+{
+  "name": "movies-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "SET DEBUG=app:* & nodemon index",
+    "start": "SET NODE_ENV=production && node index",
+    "test": "mocha --exit",
+    "cover": "nyc npm run test",
+    "report": "nyc report --reporter=html && START coverage/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/boom": "^9.1.0",
+    "@hapi/joi": "^17.1.1",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongodb": "^3.5.6"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.3",
+    "lint-staged": "^10.1.1",
+    "mocha": "^7.1.2",
+    "nodemon": "^2.0.2",
+    "nyc": "^15.0.1",
+    "prettier": "^2.0.2",
+    "proxyquire": "^2.1.3",
+    "sinon": "^9.0.2",
+    "supertest": "^4.0.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix"
+  },
+  "nyc": {
+    "all": true,
+    "include": [
+      "routes",
+      "services",
+      "lib",
+      "utils"
+    ]
+  }
+}
