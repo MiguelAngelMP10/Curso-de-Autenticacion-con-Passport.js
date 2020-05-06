@@ -5,7 +5,7 @@ const userIdSchema = joi.string().regex(/^[0-9A-Fa-f]{24}/);
 const createUserSchema = {
   name: joi.string().max(100).required(),
   email: joi.string().email().required(),
-  password: joi.string.required(),
+  password: joi.string().required(),
   isAdmin: joi.boolean(),
 };
 
