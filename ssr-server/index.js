@@ -15,25 +15,43 @@ app.use(cookieParser());
 // Basic strategy
 require("./utils/auth/strategies/basic");
 
+// Agregamos las variables de timpo en segundos
+const THIRTY_DAYS_IN_SEC = 2592000000;
+const TWO_HOURS_IN_SEC = 7200000;
+
 app.post("/auth/sign-in", async function (req, res, next) {
+  // Obtenemos el atributo rememberMe desde el cuerpo del request
+  const { rememberMe } = req.body;
   passport.authenticate("basic", function (error, data) {
     try {
       if (error || !data) {
         next(boom.unauthorized());
       }
 
-      req.login(data, { session: false }, async function (error) {
-        if (error) {
-          next(error);
+      req.login(
+        data,
+        {
+          session: false,
+        },
+        async function (error) {
+          if (error) {
+            next(error);
+          }
+
+          const { token, ...user } = data;
+
+          // Si el atributo rememberMe es verdadero la expiración será en 30 dias
+          // de lo contrario la expiración será en 2 horas
+
+          res.cookie("token", token, {
+            httpOnly: !config.dev,
+            secure: !config.dev,
+            maxAge: rememberMe ? THIRTY_DAYS_IN_SEC : TWO_HOURS_IN_SEC,
+          });
+
+          res.status(200).json(user);
         }
-
-        res.cookie("token", token, {
-          httpOnly: !config.dev,
-          secure: !config.dev,
-        });
-
-        res.status(200).json(user);
-      });
+      );
     } catch (error) {
       next(error);
     }
