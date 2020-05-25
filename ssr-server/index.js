@@ -1,5 +1,6 @@
 const express = require("express");
 const passport = require("passport");
+const session = require("express-session");
 const boom = require("@hapi/boom");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
@@ -11,11 +12,20 @@ const app = express();
 // body parser
 app.use(express.json());
 app.use(cookieParser());
+app.use(session({ secret: config.sessionSecret }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Basic strategy
 require("./utils/auth/strategies/basic");
 // OAuth strategy
 require("./utils/auth/strategies/oauth");
+
+// Twittter strategy
+require("./utils/auth/strategies/twitter");
+
+// facebook strategy
+require("./utils/auth/strategies/facebook");
 
 // Agregamos las variables de timpo en segundos
 const THIRTY_DAYS_IN_SEC = 2592000000;
@@ -131,6 +141,52 @@ app.get(
 app.get(
   "/auth/google-oauth/callback",
   passport.authenticate("google-oauth", { session: false }),
+  function (req, res, next) {
+    if (!req.user) {
+      next(boom.unauthorized());
+    }
+
+    const { token, ...user } = req.user;
+
+    res.cookie("token", token, {
+      httpOnly: !config.dev,
+      secure: !config.dev,
+    });
+
+    res.status(200).json(user);
+  }
+);
+
+//twitter
+
+app.get("/auth/twitter", passport.authenticate("twitter"));
+
+app.get(
+  "/auth/twitter/callback",
+  passport.authenticate("twitter", { session: false }),
+  function (req, res, next) {
+    if (!req.user) {
+      next(boom.unauthorized());
+    }
+
+    const { token, ...user } = req.user;
+
+    res.cookie("token", token, {
+      httpOnly: !config.dev,
+      secure: !config.dev,
+    });
+
+    res.status(200).json(user);
+  }
+);
+
+//facebook
+
+app.get("/auth/facebook", passport.authenticate("facebook"));
+
+app.get(
+  "/auth/facebook/callback",
+  passport.authenticate("facebook", { session: false }),
   function (req, res, next) {
     if (!req.user) {
       next(boom.unauthorized());
